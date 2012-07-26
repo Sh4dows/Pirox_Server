@@ -1,1 +1,1 @@
-<?php echo 'Il fait chaud, je meurs !!'; ?>
+<?php echo 'Vive la piscine :)'; ?>
