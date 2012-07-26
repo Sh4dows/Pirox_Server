@@ -1,0 +1,1 @@
+<?php echo 'Il fait chaud, je meurs !!'; ?>
