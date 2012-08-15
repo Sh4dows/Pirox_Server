@@ -17,6 +17,35 @@
 		const ERREUR_UNREGISTERED 	= '[UNREGIS]'; // Le serial n'existe pas.
 		const ERREUR_UNSUBSCRIBED	= '[UNSUBSC]'; // Expiration de l'abonnement, depuis plus de 1 jour.
 
+		private function calcStamps( $dbStamps, $nwStamps)
+		{
+			$array = explode( '!', $dbStamps); 	// on split $subTime afin de déterminer la date d'enregistrement et le temps restant
+			$recStamps = $array[0];				// date d'abonnement
+			$keyPeriod = $array[1]; 			// temps restant de l'abonnement
+			if ( $recStamps <= 0){
+				return '0!0'; 					// pas d'abonnement..
+			}
+			$difStamps = $nwStamps -$recStamps;
+			$keyPeriod -= 54321054321;			// '54321054321' valeur à soustaire ou à ajouter, by Pirox :p
+			if ( $keyPeriod <= 0 ){ 
+				return $recStamps.'!0';			// expiration de l'abonnement..
+			}
+			$keyPeriod -= $difStamps;			// on enlève la différence de temps écoulé
+			$keyPeriod += 54321054321;
+			return $recStamps.'!'.$keyPeriod;	// on retourne la nouvelle valeur
+		}
+		
+		private function makeStamps()
+		{
+			$heur = date( 'G') +2;				// heure, +2 sinon l'heure est fausse
+			$minu = date( 'i');					// les minutes
+			$seco = date( 's');					// les secondes
+			$jour = date( 'j');					// le jour du mois
+			$mois = date( 'n');					// le mois 1 à 12
+			$anne = date( 'Y');					// l'année au format AAAA
+			return mktime( $heur, $minu, $seco, $mois, $jour , $anne); // Enfin on récupère la date en (s)econde
+		}
+
 		public function __construct($dbName, $dbUser, $dbPass)
 		{
 			/* Identification base de donnée */
@@ -44,7 +73,7 @@
 					}
 				}
 			}
-			return self::ERREUR_UNREGISTERED; // Le serial n'existe pas !
+			if ( empty( $this->_id) ){ return self::ERREUR_UNREGISTERED; } // Le serial n'existe pas !
 		}
 		
 		public function dbUpdateData()
@@ -96,7 +125,13 @@
 			if ( empty( $this->_archa)){
 				return self::ACTION_KO;
 			} else {
-				return $this->_archa;
+				$nowStamps = $this->makeStamps();
+				$sub = $this->calcStamps( $this->_archa, $nowStamps);
+				$tmp = $this->updateSubA( $sub);
+				if ( $tmp == '[___TRUE]'){
+					$sub = explode( '!', $sub);
+					return $sub[1];
+				} else { return self::ACTION_KO; }
 			}
 		}
 		
@@ -105,7 +140,13 @@
 			if ( empty( $this->_basic)){
 				return self::ACTION_KO;
 			} else {
-				return $this->_basic;
+				$nowStamps = $this->makeStamps();
+				$sub = $this->calcStamps( $this->_basic, $nowStamps);
+				$tmp = $this->updateSubB( $sub);
+				if ( $tmp == '[___TRUE]'){
+					$sub = explode( '!', $sub);
+					return $sub[1];
+				} else { return self::ACTION_KO; }
 			}
 		}
 
@@ -114,7 +155,13 @@
 			if ( empty( $this->_elite)){
 				return self::ACTION_KO;
 			} else {
-				return $this->_elite;
+				$nowStamps = $this->makeStamps();
+				$sub = $this->calcStamps( $this->_elite, $nowStamps);
+				$tmp = $this->updateSubE( $sub);
+				if ( $tmp == '[___TRUE]'){
+					$sub = explode( '!', $sub);
+					return $sub[1];
+				} else { return self::ACTION_KO; }
 			}
 		}
 		
@@ -123,7 +170,13 @@
 			if ( empty( $this->_premium)){
 				return self::ACTION_KO;
 			} else {
-				return $this->_premium;
+				$nowStamps = $this->makeStamps();
+				$sub = $this->calcStamps( $this->_premium, $nowStamps);
+				$tmp = $this->updateSubP( $sub);
+				if ( $tmp == '[___TRUE]'){
+					$sub = explode( '!', $sub);
+					return $sub[1];
+				} else { return self::ACTION_KO; }
 			}
 		}
 		
